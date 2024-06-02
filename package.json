@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "compile": "npx tsc",
+    "start": "npm run compile && node ./build/index.js",
+  },
+  "license": "MIT",
   "devDependencies": {
     "typescript": "^5.4.5"
   }
