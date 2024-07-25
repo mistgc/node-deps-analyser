@@ -1,74 +1,73 @@
 import { Analyser, AnalyserType } from ".";
+import { PackageInfo, PackageInfoList } from "../package_info";
+import { Package } from "../package";
 import * as utils from "../utils";
-import fs from "fs"
-import path from "path"
 
 type Pair<K, V> = utils.Pair<K, V>;
 
 export class NpmAnalyser implements Analyser {
-    targetPath: string = "";
-    necessaryFilesName: string[] = [
-        "package.json",
-    ];
+    packageInfoList: PackageInfoList | undefined;
+    rootPackageInfo: PackageInfo | undefined;
 
     getType(): AnalyserType {
         return AnalyserType.NpmAnalyser;
     }
 
-    setTargetPath(path: string): boolean {
-        let result = true;
+    analyze(packageInfoList: PackageInfoList): Promise<Package> {
+        this.rootPackageInfo = packageInfoList.pop()
+        this.packageInfoList = packageInfoList;
 
-        fs.access(path, fs.constants.F_OK, (err) => {
-            if (err) {
-                console.error(`Project ${path} does not exist.`);
-                result = false;
-            }
-        });
-
-        return result;
-    }
-
-    analyze(targetPath: string): Promise<Package> {
         return new Promise((resolve, reject) => {
-            if (this.setTargetPath(targetPath) === false) {
-                reject(`Project ${targetPath} is not analyzed.`);
+            if (this.rootPackageInfo === undefined) {
+                reject("rootPackageInfo is undefined");
+                return;
             }
 
-            let items = fs.readdirSync(targetPath);
+            let lambda = (info: PackageInfo): Package => {
+                let p = new Package(info.name, info.version, info.desc, info.license);
 
-            if (this.verify(items) === false) {
-                reject(`Project ${targetPath} `);
+                if (info.deps.length === 0 && info.devDeps.length === 0) {
+                    return p;
+                }
+
+                if (info.isRoot) {
+                    for (let i = 0; i < info.devDeps.length; i++) {
+                        if (this.packageInfoList !== undefined) {
+                            for (let j = 0; j < this.packageInfoList.length; j++) {
+                                if (info.devDeps[i].k.localeCompare(this.packageInfoList.items[j].name) === 0) {
+                                    let np = lambda(this.packageInfoList.items[j])
+                                    p.devDeps.push(np);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (let i = 0; i < info.deps.length; i++) {
+                    if (this.packageInfoList !== undefined) {
+                        for (let j = 0; j < this.packageInfoList.length; j++) {
+                            if (info.deps[i].k.localeCompare(this.packageInfoList.items[j].name) === 0) {
+                                let np = lambda(this.packageInfoList.items[j])
+                                p.deps.push(np);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return p;
             }
 
-            let packageJsonPath = path.join(this.targetPath, "package.json");
+            let root = lambda(this.rootPackageInfo);
+            root.isRoot = true;
 
-            utils.readFile(packageJsonPath)
-                .then((buf) => {
-                    let packageJsonCtnt = buf.toString("utf8");
-                    let packageObj = JSON.parse(packageJsonCtnt);
-                    let dependencies: Pair<string, string>[] = packageObj["dependencies"];
-                    let devDependencies: Pair<string, string>[] = packageObj["devDependencies"];
-
-                    dependencies.forEach((value, index) => {
-                    });
-
-                    devDependencies.forEach((value, index) => {
-                    });
-                });
+            resolve(root);
         });
     }
 
-    private verify(items: string[]): boolean {
-        let numNecessaryFiles: number = this.necessaryFilesName.length;
-
-        for (let i = 0; i < items.length; i++) {
-            for (let j = 0; j < this.necessaryFilesName.length; j++) {
-                if (items[i] === this.necessaryFilesName[j]) {
-                    numNecessaryFiles -= 1;
-                }
-            }
-        }
-
-        return numNecessaryFiles === 0;
+    private analyzeRecursively(packageInfo: PackageInfo): Promise<Package> {
+        return new Promise((resolve, reject) => {
+        });
     }
 }

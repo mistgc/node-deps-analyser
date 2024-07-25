@@ -1,3 +1,7 @@
+import { PackageInfoList } from "../package_info";
+import { NpmAnalyser } from "./npm_analyser";
+import { Package } from "../package";
+
 export enum AnalyserType {
     NpmAnalyser,
     YarnAnalyser,
@@ -16,5 +20,14 @@ export interface Analyser {
      * @param packagePath The path of the specific project
      * @returns The root package wrapped by the Promise
      */
-    analyze(packagePath: string): Promise<Package>;
+    analyze(packageInfoList: PackageInfoList): Promise<Package>;
+}
+
+export class AnalyserFactory {
+    static createAnalyser(analyzeType: AnalyserType): Analyser {
+        switch(analyzeType) {
+            default:
+                return new NpmAnalyser();
+        }
+    }
 }
