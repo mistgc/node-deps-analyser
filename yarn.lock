@@ -36,11 +36,6 @@
   dependencies:
     undici-types "~5.26.4"
 
-"@types/semver@^7.5.8":
-  version "7.5.8"
-  resolved "https://r.cnpmjs.org/@types/semver/-/semver-7.5.8.tgz"
-  integrity sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==
-
 ts-graphviz@^2.1.2:
   version "2.1.2"
   resolved "https://registry.npmmirror.com/ts-graphviz/-/ts-graphviz-2.1.2.tgz#657b7b6eada658118d62f75be2159506a0f2ff9c"
