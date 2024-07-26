@@ -1,6 +1,7 @@
 {
   "name": "node-deps-analyser",
   "license": "MIT",
+  "version": "1.0.0",
   "scripts": {
     "compile": "npx tsc"
   },

@@ -1,6 +1,7 @@
 import { Package } from "../core/package";
 import { toStream, Format } from "@ts-graphviz/adapter";
 import * as graphviz from "ts-graphviz";
+import { attribute as attr } from "ts-graphviz";
 
 export function generateGraphsImageStream(root: Package, format: Format.values = "svg"): Promise<NodeJS.ReadableStream> {
     let g = new graphviz.Digraph();
@@ -14,7 +15,9 @@ export function generateGraphsImageStream(root: Package, format: Format.values =
         });
 
         p.devDeps.forEach((dep) => {
-            g.createEdge([node, lambda(dep)]);
+            g.createEdge([node, lambda(dep)], {
+                [attr.color]: "blue"
+            });
         });
 
         return node;
