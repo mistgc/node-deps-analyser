@@ -1,11 +1,5 @@
-import { analyze } from "./core"
+import { cli } from "./cli";
 
 let argv = process.argv.slice(2);
 
-if (argv.length === 2) {
-    if (argv[0] === "analyze") {
-        analyze(argv[1]).then((p) => {
-            console.log(JSON.stringify(p))
-        });
-    }
-}
+cli(argv);
