@@ -1,5 +1,11 @@
 import { cli } from "./cli";
+import { Package } from "./core/package";
+import { PackageInfo } from "./core/package_info";
+import { analyze } from "./core";
 
-let argv = process.argv.slice(2);
-
-cli(argv);
+export {
+    cli,
+    analyze,
+    Package,
+    PackageInfo,
+};
