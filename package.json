@@ -1,5 +1,5 @@
 {
-  "name": "npm-deps-analyser",
+  "name": "node-deps-analyser",
   "license": "MIT",
   "scripts": {
     "compile": "npx tsc"
