@@ -2,6 +2,10 @@
     <h1>node-deps-analyser (nda)</h1>
 </div>
 
+<div align="center">
+    <img src="./assets/nda-deps.svg" width="600"/>
+</div>
+
 ## Installation
 
 You must installed [Graphviz](https://graphviz.org) firstly.
