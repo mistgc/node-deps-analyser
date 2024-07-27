@@ -22,6 +22,7 @@ Usage:
     nda [option] <target path>
 
 Options:
+    -D, --depth <number>
     -J, --json
     -F, --format <format>
     -O, --output <output path>
@@ -31,6 +32,7 @@ Format:
 
 Examples:
     nda --json ./node-deps-analyser
+    nda --depth 3 --json ./node-deps-analyser
     nda ./node-deps-analyser
     nda --format png --output /tmp/output.png ./node-deps-analyser
 ```
