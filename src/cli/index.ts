@@ -6,6 +6,7 @@ import * as fs from "fs";
 let helpText = ` Usage: nda [option] <target path>
 
 Options:
+    -D, --depth <number>
     -J, --json
     -F, --format <format>
     -O, --output <output path>
@@ -15,18 +16,21 @@ Format:
 
 Examples:
     nda --json ./node-deps-analyser
+    nda --json --depth 3 ./node-deps-analyser
     nda ./node-deps-analyser
     nda --format png --output /tmp/output.png ./node-deps-analyser
 `;
 
 class CliOpts {
     public targetPath: string;
+    public depth: number;
     public json: boolean;
     public format: Format.values;
     public outputPath: string;
 
-    constructor(targetPath: string, json: boolean = false, format: Format.values = "svg", outputPath: string = "./output.svg") {
+    constructor(targetPath: string, depth: number = -1, json: boolean = false, format: Format.values = "svg", outputPath: string = "./output.svg") {
         this.targetPath = targetPath;
+        this.depth = depth;
         this.json = json;
         this.format = format;
         this.outputPath = outputPath;
@@ -76,6 +80,23 @@ class CliOpts {
                 }
                 let value = argv[i + 1];
                 opts.outputPath = value;
+            } else if (arg.localeCompare("--depth") === 0 || arg.localeCompare("-D") === 0) {
+                if (i + 1 >= argv.length) {
+                    console.log(helpText);
+                    console.error("Pass a number to the option \"-D | --depth\", please.");
+                    process.exit(-1);
+                }
+
+                let value = argv[i + 1];
+                let depth = parseInt(value);
+
+                if (isNaN(depth) || depth < 0) {
+                    console.log(helpText);
+                    console.error("Pass a postive integer to the option \"-D | --depth\", please.");
+                    process.exit(-1);
+                }
+
+                opts.depth = depth;
             }
         }
 
@@ -88,11 +109,11 @@ export function cli(argv: string[]) {
     let opts = CliOpts.fromArgv(argv);
 
     if (opts.json) {
-        analyze(opts.targetPath).then((p) => {
+        analyze(opts.targetPath, opts.depth).then((p) => {
             console.log(JSON.stringify(p));
         });
     } else {
-        analyze(opts.targetPath).then((p) => {
+        analyze(opts.targetPath, opts.depth).then((p) => {
             generateGraphsImageStream(p, opts.format).then((imageStream) => {
                 let fileStream = fs.createWriteStream(opts.outputPath);
                 imageStream.pipe(fileStream);

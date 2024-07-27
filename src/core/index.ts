@@ -43,7 +43,7 @@ function generatePackageInfoList(targetPath: string): Promise<PackageInfoList> {
  * @returns Serialized as a JSON format string that indicate a
  *          step-by-step dependency graph for a given target item.
  */
-export async function analyze(targetPath: string): Promise<Package> {
+export async function analyze(targetPath: string, depth: number = -1): Promise<Package> {
     let rootPackageInfo = PackageInfo.fromJsonText(fs.readFileSync(path.join(targetPath, "package.json")).toString());
     rootPackageInfo.isRoot = true;
     return new Promise((resolve, reject) => {
@@ -52,7 +52,7 @@ export async function analyze(targetPath: string): Promise<Package> {
                 // Puts the root package in the last of the `packageInfoList`.
                 packageInfoList.push(rootPackageInfo);
                 let analyser = AnalyserFactory.createAnalyser(AnalyserType.NpmAnalyser);
-                analyser.analyze(packageInfoList).then((res) => {
+                analyser.analyze(packageInfoList, depth).then((res) => {
                     resolve(res);
                 });
             })

@@ -13,7 +13,7 @@ export class NpmAnalyser implements Analyser {
         return AnalyserType.NpmAnalyser;
     }
 
-    analyze(packageInfoList: PackageInfoList): Promise<Package> {
+    analyze(packageInfoList: PackageInfoList, depth: number = -1): Promise<Package> {
         this.rootPackageInfo = packageInfoList.pop()
         this.packageInfoList = packageInfoList;
 
@@ -23,19 +23,21 @@ export class NpmAnalyser implements Analyser {
                 return;
             }
 
-            let lambda = (info: PackageInfo): Package => {
+            let lambda = (info: PackageInfo, d: number): Package => {
                 let p = new Package(info.name, info.version, info.desc, info.license);
 
-                if (info.deps.length === 0 && info.devDeps.length === 0) {
+                if ((info.deps.length === 0 && info.devDeps.length === 0) || d === 0) {
                     return p;
                 }
+
+                d -= 1;
 
                 if (info.isRoot) {
                     for (let i = 0; i < info.devDeps.length; i++) {
                         if (this.packageInfoList !== undefined) {
                             for (let j = 0; j < this.packageInfoList.length; j++) {
                                 if (info.devDeps[i].k.localeCompare(this.packageInfoList.items[j].name) === 0) {
-                                    let np = lambda(this.packageInfoList.items[j])
+                                    let np = lambda(this.packageInfoList.items[j], d)
                                     p.devDeps.push(np);
                                     break;
                                 }
@@ -48,7 +50,7 @@ export class NpmAnalyser implements Analyser {
                     if (this.packageInfoList !== undefined) {
                         for (let j = 0; j < this.packageInfoList.length; j++) {
                             if (info.deps[i].k.localeCompare(this.packageInfoList.items[j].name) === 0) {
-                                let np = lambda(this.packageInfoList.items[j])
+                                let np = lambda(this.packageInfoList.items[j], d)
                                 p.deps.push(np);
                                 break;
                             }
@@ -59,7 +61,7 @@ export class NpmAnalyser implements Analyser {
                 return p;
             }
 
-            let root = lambda(this.rootPackageInfo);
+            let root = lambda(this.rootPackageInfo, depth);
             root.isRoot = true;
 
             resolve(root);
